@@ -72,6 +72,84 @@
       <ul id="reportList" class="report-list"></ul>
     </section>
 
+
+<section id="builderPanel" class="panel">
+
+  <div class="section-heading">
+
+    <h2>iOS AssetBundle Builder</h2>
+
+    <span class="badge">Unity workflow</span>
+
+  </div>
+
+  <p class="muted">
+
+    Prepare a Unity Editor build script for assets you own
+
+    or have permission to modify.
+
+  </p>
+
+  <label for="bundleName">AssetBundle name</label>
+
+  <input
+
+    id="bundleName"
+
+    type="text"
+
+    value="cadenzza_ios_bundle"
+
+    maxlength="64"
+
+    autocomplete="off"
+
+  >
+
+  <label for="unityVersion">Unity Editor version</label>
+
+  <input
+
+    id="unityVersion"
+
+    type="text"
+
+    placeholder="Example: 2022.3.20f1"
+
+    autocomplete="off"
+
+  >
+
+  <label for="assetFolder">Unity project asset folder</label>
+
+  <input
+
+    id="assetFolder"
+
+    type="text"
+
+    value="Assets/CADENZZA"
+
+    autocomplete="off"
+
+  >
+
+  <button id="prepareBuildButton" class="button primary" type="button">
+
+    Prepare Unity Build Script
+
+  </button>
+
+  <p id="builderMessage" class="message" aria-live="polite">
+
+    This prepares a script for Unity Editor. It does not build a bundle inside the browser.
+
+  </p>
+
+  <pre id="buildScriptOutput" hidden></pre>
+
+</section>
     <section class="panel note-panel">
       <h2>Important limitations</h2>
       <p class="muted">This starter tool inspects ZIP archives in your browser. It does not decompile protected code, rebuild Unity projects, sign apps, or convert native Unity AssetBundles into iOS files. A real conversion requires a compatible Unity workflow and validated output.</p>
