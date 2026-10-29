@@ -292,3 +292,72 @@
     setTimeout(() => URL.revokeObjectURL(url), 1500);
   }
 })();
+const prepareBuildButton = document.getElementById("prepareBuildButton");
+
+if (prepareBuildButton) {
+  prepareBuildButton.addEventListener("click", function () {
+    const bundleName = document.getElementById("bundleName").value.trim();
+    const unityVersion = document.getElementById("unityVersion").value.trim();
+    const assetFolder = document.getElementById("assetFolder").value.trim();
+    const message = document.getElementById("builderMessage");
+    const output = document.getElementById("buildScriptOutput");
+
+    if (!/^[a-zA-Z0-9_-]{1,64}$/.test(bundleName)) {
+      message.textContent = "Use only letters, numbers, underscores, or hyphens for the bundle name.";
+      output.hidden = true;
+      return;
+    }
+
+    if (!/^[0-9]+\.[0-9]+\.[0-9]+[a-zA-Z0-9.]*$/.test(unityVersion)) {
+      message.textContent = "Enter your Unity Editor version, for example 2022.3.20f1.";
+      output.hidden = true;
+      return;
+    }
+
+    if (!/^Assets(?:\/[a-zA-Z0-9_-]+)*$/.test(assetFolder)) {
+      message.textContent = "Enter a valid Unity project folder, such as Assets/CADENZZA.";
+      output.hidden = true;
+      return;
+    }
+
+    const script = [
+      "using UnityEditor;",
+      "using UnityEngine;",
+      "",
+      "public static class CadenzzaIOSBuilder",
+      "{",
+      "    [MenuItem(\"CADENZZA/Build iOS AssetBundle\")]",
+      "    public static void BuildBundle()",
+      "    {",
+      "        const string outputFolder = \"AssetBundleOutput/iOS\";",
+      "        const string assetFolder = \"" + assetFolder + "\";",
+      "        const string bundleName = \"" + bundleName + "\";",
+      "        System.IO.Directory.CreateDirectory(outputFolder);",
+      "        var assets = AssetDatabase.FindAssets(\"\", new[] { assetFolder });",
+      "        var paths = new System.Collections.Generic.List<string>();",
+      "        foreach (var guid in assets)",
+      "        {",
+      "            var path = AssetDatabase.GUIDToAssetPath(guid);",
+      "            if (!AssetDatabase.IsValidFolder(path)) paths.Add(path);",
+      "        }",
+      "        if (paths.Count == 0)",
+      "        {",
+      "            Debug.LogError(\"No assets found in \" + assetFolder);",
+      "            return;",
+      "        }",
+      "        var build = new AssetBundleBuild();",
+      "        build.assetBundleName = bundleName;",
+      "        build.assetNames = paths.ToArray();",
+      "        BuildPipeline.BuildAssetBundles(outputFolder,",
+      "            new[] { build }, BuildAssetBundleOptions.None,",
+      "            BuildTarget.iOS);",
+      "        Debug.Log(\"iOS AssetBundle build finished.\");",
+      "    }",
+      "}"
+    ].join("\n");
+
+    output.textContent = script;
+    output.hidden = false;
+    message.textContent = "Unity Editor build script prepared. Save it as CadenzzaIOSBuilder.cs in your Unity project's Assets/Editor folder.";
+  });
+}
