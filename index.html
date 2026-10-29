@@ -57,6 +57,16 @@
       </div>
     </section>
 
+    <section id="unityDetails" class="panel hidden" aria-live="polite">
+      <div class="section-heading"><h2>Unity header inspection</h2><span class="badge">Sample only</span></div>
+      <p class="muted small">The tool reads up to the first 256 KB in your browser. Signatures, version strings, and platform words are clues only; they do not prove full compatibility or extract the bundle's assets.</p>
+      <dl id="unitySummary" class="details-grid unity-summary"></dl>
+      <h3 class="subheading">First 64 bytes (hex)</h3>
+      <pre id="unityHex" class="hex-preview"></pre>
+      <h3 class="subheading">Readable strings found in sample</h3>
+      <ul id="unityStrings" class="report-list"></ul>
+    </section>
+
     <section id="reportPanel" class="panel hidden">
       <div class="section-heading"><h2>iOS compatibility report</h2><span id="compatBadge" class="badge">Needs review</span></div>
       <ul id="reportList" class="report-list"></ul>

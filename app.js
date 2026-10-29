@@ -14,6 +14,10 @@
   const reportButton = document.getElementById("downloadReportButton");
   const reportList = document.getElementById("reportList");
   const compatBadge = document.getElementById("compatBadge");
+  const unityDetails = document.getElementById("unityDetails");
+  const unitySummary = document.getElementById("unitySummary");
+  const unityHex = document.getElementById("unityHex");
+  const unityStrings = document.getElementById("unityStrings");
 
   let currentFile = null;
   let zipEntries = [];
@@ -51,6 +55,10 @@
     reportList.replaceChildren();
     currentReport = [];
     zipEntries = [];
+    if (unityDetails) unityDetails.classList.add("hidden");
+    if (unitySummary) unitySummary.replaceChildren();
+    if (unityHex) unityHex.textContent = "";
+    if (unityStrings) unityStrings.replaceChildren();
     exportButton.disabled = true;
   }
 
@@ -119,18 +127,131 @@
         compatBadge.textContent = "Unsupported";
       }
     } else if (looksUnity) {
-      fileMessage.textContent = "This looks like a Unity .unity3d file. This browser prototype cannot parse or convert native Unity AssetBundles yet.";
-      addReport("File detection", "The filename uses the .unity3d extension; this alone does not confirm its internal format.");
-      addReport("iOS compatibility", "Needs technical inspection of Unity version, platform target, assets, and dependencies.");
-      addReport("Next step", "Inspect it with a compatible Unity AssetBundle tool or an authorized Unity project workflow.");
-      addReport("Conversion", "No conversion was attempted and no output was created.");
-      compatBadge.textContent = "Unsupported";
+      await inspectUnityBundle(file);
     } else {
       fileMessage.textContent = "Please choose a .zip or .unity3d file.";
       addReport("File type", "This prototype supports ZIP inspection and basic .unity3d filename detection.");
       compatBadge.textContent = "Unsupported";
     }
   });
+
+
+  async function inspectUnityBundle(file) {
+    fileMessage.textContent = "Reading a small header sample locally. This can identify some common Unity bundle signatures, but it cannot fully parse or convert the bundle.";
+    try {
+      const sampleSize = Math.min(file.size, 256 * 1024);
+      const buffer = await file.slice(0, sampleSize).arrayBuffer();
+      const bytes = new Uint8Array(buffer);
+      const ascii = bytesToAscii(bytes);
+      const firstLine = ascii.split("\n")[0].replace(/\0/g, "").trim();
+      const headerType = detectUnityHeader(ascii);
+      const unityVersion = findUnityVersion(ascii);
+      const platformHints = findPlatformHints(ascii);
+      const strings = extractReadableStrings(bytes, 5, 30);
+
+      if (unityDetails) unityDetails.classList.remove("hidden");
+      if (unitySummary) {
+        const facts = [
+          ["Header signature", headerType],
+          ["First readable line", firstLine || "(no readable text)"],
+          ["Unity version hint", unityVersion || "Not found in first 256 KB"],
+          ["Platform hints", platformHints.length ? platformHints.join(", ") : "No clear platform marker found"],
+          ["Bytes sampled", formatBytes(sampleSize)]
+        ];
+        unitySummary.replaceChildren();
+        for (const [label, value] of facts) {
+          const item = document.createElement("div");
+          const dt = document.createElement("dt");
+          const dd = document.createElement("dd");
+          dt.textContent = label;
+          dd.textContent = value;
+          item.append(dt, dd);
+          unitySummary.appendChild(item);
+        }
+      }
+
+      if (unityHex) {
+        const preview = Array.from(bytes.slice(0, 64), b => b.toString(16).padStart(2, "0")).join(" ");
+        unityHex.textContent = preview || "(empty file)";
+      }
+      if (unityStrings) {
+        unityStrings.replaceChildren();
+        if (!strings.length) {
+          const li = document.createElement("li");
+          li.textContent = "No readable text strings found in the sampled bytes.";
+          unityStrings.appendChild(li);
+        } else {
+          for (const value of strings) {
+            const li = document.createElement("li");
+            li.textContent = value;
+            unityStrings.appendChild(li);
+          }
+        }
+      }
+
+      addReport("File detection", `Extension is .unity3d. Header check: ${headerType}.`);
+      addReport("Unity version hint", unityVersion || "No Unity version string found in the first 256 KB; this does not prove the version is absent.");
+      addReport("Platform hints", platformHints.length ? platformHints.join(", ") : "No clear platform marker found in the sampled bytes.");
+      addReport("Inspection scope", `Only the first ${formatBytes(sampleSize)} were sampled. Readable strings and header signatures are clues, not a complete asset parse.`);
+      addReport("iOS compatibility", "Cannot be confirmed from a header sample alone. Check the source Unity project, Unity version, target platform, dependencies, shaders, and asset formats.");
+      addReport("Conversion", "No conversion was attempted and no output was created.");
+      compatBadge.textContent = headerType.startsWith("Recognized") ? "Header recognized" : "Needs review";
+      fileMessage.textContent = "Header sample inspected locally. Review the signature, version hints, and readable strings below. This is diagnostic information only—not a full Unity AssetBundle parser.";
+    } catch (error) {
+      fileMessage.textContent = "Could not read the file sample. Try a smaller file or another browser.";
+      addReport("Unity inspection", "Failed to read the initial byte sample.");
+      addReport("Conversion", "No conversion was attempted.");
+      compatBadge.textContent = "Needs review";
+    }
+  }
+
+  function bytesToAscii(bytes) {
+    let out = "";
+    for (const byte of bytes) out += byte >= 32 && byte <= 126 ? String.fromCharCode(byte) : (byte === 10 ? "\n" : byte === 13 ? "\r" : "\0");
+    return out;
+  }
+
+  function detectUnityHeader(ascii) {
+    const start = ascii.replace(/^\uFEFF/, "");
+    if (start.startsWith("UnityFS")) return "Recognized UnityFS signature";
+    if (start.startsWith("UnityWeb")) return "Recognized legacy UnityWeb signature";
+    if (start.startsWith("UnityRaw")) return "Recognized legacy UnityRaw signature";
+    if (start.startsWith("UnityArchive")) return "Recognized UnityArchive signature";
+    if (start.startsWith("Unity")) return "Possible Unity signature (unrecognized variant)";
+    return "No common Unity bundle signature at byte 0";
+  }
+
+  function findUnityVersion(ascii) {
+    const match = ascii.match(/20\d{2}\.\d+\.\d+[a-zA-Z]\d+/) || ascii.match(/\b\d{1,2}\.\d{1,2}\.\d{1,2}[a-zA-Z]\d+\b/);
+    return match ? match[0] : "";
+  }
+
+  function findPlatformHints(ascii) {
+    const candidates = [
+      ["iOS", /iPhone|iPad|iOS|iPhonePlayer/i],
+      ["Android", /Android|AndroidPlayer/i],
+      ["Windows", /WindowsPlayer|Win64|Win32/i],
+      ["macOS", /OSXPlayer|MacPlayer|StandaloneOSX/i],
+      ["WebGL", /WebGL/i]
+    ];
+    return candidates.filter(([, pattern]) => pattern.test(ascii)).map(([name]) => name);
+  }
+
+  function extractReadableStrings(bytes, minLength, limit) {
+    const found = [];
+    let current = "";
+    for (const byte of bytes) {
+      if (byte >= 32 && byte <= 126) {
+        current += String.fromCharCode(byte);
+      } else {
+        if (current.length >= minLength) found.push(current);
+        current = "";
+      }
+      if (found.length >= limit) break;
+    }
+    if (current.length >= minLength && found.length < limit) found.push(current);
+    return [...new Set(found)].slice(0, limit);
+  }
 
   exportButton.addEventListener("click", async () => {
     if (!currentFile || !currentFile.name.toLowerCase().endsWith(".zip") || typeof JSZip === "undefined") return;

@@ -63,3 +63,40 @@ footer { text-align: center; color: #778196; font-size: 11px; padding: 10px; }
   .details-grid { grid-template-columns: 2fr 1fr 1fr; }
   .panel { padding: 22px; }
 }
+
+
+/* Unity header inspector */
+.unity-summary {
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+  margin-bottom: 18px;
+}
+.unity-summary > div {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--border, rgba(255,255,255,.12));
+  border-radius: 12px;
+  background: rgba(255,255,255,.025);
+}
+.unity-summary dt {
+  margin-bottom: 6px;
+  font-size: .75rem;
+  opacity: .7;
+}
+.unity-summary dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: .9rem;
+}
+.subheading {
+  margin: 18px 0 8px;
+  font-size: .95rem;
+}
+.hex-preview {
+  padding: 12px;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  border-radius: 10px;
+  background: rgba(0,0,0,.24);
+  font-size: .78rem;
+  line-height: 1.7;
+}
