@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10131b">
+  <title>CADENZZA iOS Script Convert</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand-mark">C</div>
+      <div>
+        <p class="eyebrow">UNITY ASSET WORKSPACE</p>
+        <h1>CADENZZA <span>iOS Script Convert</span></h1>
+      </div>
+    </header>
+
+    <section class="hero panel">
+      <div class="status-pill"><span class="status-dot"></span> LOCAL FILE INSPECTION</div>
+      <h2>Inspect your Unity files.</h2>
+      <p class="muted">Choose a ZIP archive or Unity asset bundle to check its type, inspect supported archive contents, and review iOS compatibility notes.</p>
+      <label class="file-picker" for="fileInput">
+        <span class="upload-icon">↑</span>
+        <strong>Choose a file</strong>
+        <span class="muted small">.zip or .unity3d · processed in your browser</span>
+      </label>
+      <input id="fileInput" type="file" accept=".zip,.unity3d,application/zip,application/octet-stream">
+      <p class="privacy-note">Your selected file is not uploaded by this page.</p>
+    </section>
+
+    <section id="filePanel" class="panel hidden" aria-live="polite">
+      <div class="section-heading"><h2>File details</h2><span id="typeBadge" class="badge">—</span></div>
+      <dl class="details-grid">
+        <div><dt>File name</dt><dd id="fileName">—</dd></div>
+        <div><dt>File size</dt><dd id="fileSize">—</dd></div>
+        <div><dt>Detected type</dt><dd id="detectedType">—</dd></div>
+      </dl>
+      <div id="fileMessage" class="message"></div>
+    </section>
+
+    <section id="contentsPanel" class="panel hidden">
+      <div class="section-heading"><h2>Archive contents</h2><span id="entryCount" class="badge">0 files</span></div>
+      <p class="muted small">Only ZIP-compatible archives can be listed here. Native Unity AssetBundles need a compatible parser.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Path</th><th>Type</th><th>Size</th></tr></thead>
+          <tbody id="contentsBody"></tbody>
+        </table>
+      </div>
+      <div class="button-row">
+        <button id="exportZipButton" class="button primary" disabled>Export ZIP</button>
+        <button id="downloadReportButton" class="button secondary">Download report</button>
+      </div>
+    </section>
+
+    <section id="reportPanel" class="panel hidden">
+      <div class="section-heading"><h2>iOS compatibility report</h2><span id="compatBadge" class="badge">Needs review</span></div>
+      <ul id="reportList" class="report-list"></ul>
+    </section>
+
+    <section class="panel note-panel">
+      <h2>Important limitations</h2>
+      <p class="muted">This starter tool inspects ZIP archives in your browser. It does not decompile protected code, rebuild Unity projects, sign apps, or convert native Unity AssetBundles into iOS files. A real conversion requires a compatible Unity workflow and validated output.</p>
+    </section>
+    <footer>CADENZZA · Browser-based prototype</footer>
+  </main>
+</body>
+</html>
