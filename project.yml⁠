@@ -6,8 +6,7 @@ targets:
     type: application
     platform: iOS
     deploymentTarget: "16.0"
-    sources:
-      - path: ContentView.swift
+    sources: [ContentView.swift, Info.plist]
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.cadenzza.autoConvert
       INFOPLIST_FILE: Info.plist
