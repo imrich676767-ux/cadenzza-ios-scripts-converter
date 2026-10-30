@@ -1,0 +1,21 @@
+import SwiftUI
+
+@main
+struct CADENZZAApp: App {
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+    }
+}
+
+struct ContentView: View {
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+            Text("CADENZZA Auto Convert")
+                .font(.headline)
+                .foregroundColor(.white)
+        }
+    }
+}
