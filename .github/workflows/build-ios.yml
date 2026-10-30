@@ -1,4 +1,5 @@
 name: Build CADENZZA iOS App
+
 on:
   push:
     branches: [ main, master ]
@@ -9,18 +10,29 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
+
+      - name: Set up Homebrew
+        run: brew --version
+
       - name: Install XcodeGen
         run: brew install xcodegen
+
+      - name: List Repository Contents
+        run: ls -la
+
       - name: Generate Project
         run: xcodegen generate
+
       - name: Build Simulator App
         run: xcodebuild -project CADENZZAAutoConvert.xcodeproj -scheme CADENZZAAutoConvert -sdk iphonesimulator -configuration Release CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
-      - name: Archive build
+
+      - name: Archive build into IPA
         run: |
           mkdir -p Payload
           cp -r build/Release-iphonesimulator/CADENZZAAutoConvert.app Payload/
           zip -r CADENZZA.zip Payload
           mv CADENZZA.zip CADENZZA.ipa
+
       - uses: actions/upload-artifact@v3
         with:
           name: CADENZZA-IPA
