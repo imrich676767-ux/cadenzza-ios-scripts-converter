@@ -1,0 +1,17 @@
+import SwiftUI
+
+struct ContentView: View {
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+            VStack(spacing: 16) {
+                Text("CADENZZA Auto Convert")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                Text("Ready for iOS Conversion")
+                    .font(.subheadline)
+                    .foregroundColor(.green)
+            }
+        }
+    }
+}
